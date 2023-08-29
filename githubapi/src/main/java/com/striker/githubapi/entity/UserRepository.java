@@ -16,6 +16,12 @@ public class UserRepository {
         branches = new ArrayList<>();
     }
 
+    public UserRepository(String repository_name, String owner_login, List<GitHubBranch> branches) {
+        this.repository_name = repository_name;
+        this.owner_login = owner_login;
+        this.branches = branches;
+    }
+
     public UserRepository(String repository_name) {
         this.repository_name = repository_name;
     }

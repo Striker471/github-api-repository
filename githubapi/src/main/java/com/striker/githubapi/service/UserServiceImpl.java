@@ -27,27 +27,27 @@ public class UserServiceImpl implements UserService {
         this.restTemplate = restTemplate;
     }
 
-    @Override
-    public List<UserRepository> getUserRepositories(String userName, String githubToken) {
+        @Override
+        public List<UserRepository> getUserRepositories(String userName, String githubToken) {
 
-        String path = "https://api.github.com/users/" + userName + "/repos";
+            String path = "https://api.github.com/users/" + userName + "/repos";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + githubToken);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + githubToken);
 
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+            HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<RepositoryData[]> response;
-        try {
-            response = restTemplate.exchange(
-                    path,
-                    HttpMethod.GET,
-                    entity,
-                    RepositoryData[].class);
-        } catch (Exception e) {
-            throw new UserNotFoundException("User Not Found:  " + e.getMessage());
-        }
-        RepositoryData[] repositoryDatum1s = response.getBody();
+            ResponseEntity<RepositoryData[]> response;
+            try {
+                response = restTemplate.exchange(
+                        path,
+                        HttpMethod.GET,
+                        entity,
+                        RepositoryData[].class);
+            } catch (Exception e) {
+                throw new UserNotFoundException("User Not Found:  " + e.getMessage());
+            }
+            RepositoryData[] repositoryDatum1s = response.getBody();
 
         List<RepositoryData> repositoryDataList = new ArrayList<>(Arrays.asList(repositoryDatum1s));
 

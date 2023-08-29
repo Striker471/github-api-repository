@@ -25,13 +25,11 @@ public class UserRestController {
 
     }
 
-    @GetMapping("/users/{userName}")
-    public List<UserRepository> getUserByUsername(@PathVariable String userName,
-                                                  @RequestHeader HttpHeaders headers
-    ) {
-        if (headers.getAccept().contains(MediaType.APPLICATION_XML)) {
-            throw new WrongHeaderException("Wrong header type - xml");
-        }
+    @GetMapping(
+            value = "/users/{userName}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public List<UserRepository> getUserByUsername(@PathVariable String userName) {
 
         return userService.getUserRepositories(userName, githubToken);
 

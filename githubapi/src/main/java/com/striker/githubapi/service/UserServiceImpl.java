@@ -23,12 +23,12 @@ public class UserServiceImpl implements UserService {
     private final RestTemplate restTemplate;
 
     @Autowired
-    public UserServiceImpl(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
+    public UserServiceImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @Override
-    public List<UserRepository> getUserRepositories(String userName, String githubToken){
+    public List<UserRepository> getUserRepositories(String userName, String githubToken) {
 
         String path = "https://api.github.com/users/" + userName + "/repos";
 
@@ -44,46 +44,42 @@ public class UserServiceImpl implements UserService {
                     HttpMethod.GET,
                     entity,
                     RepositoryData[].class);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new UserNotFoundException("User Not Found:  " + e.getMessage());
         }
-        RepositoryData[] repositoryData = response.getBody();
+        RepositoryData[] repositoryDatum1s = response.getBody();
 
-        List<RepositoryData> repositoryDataList = new ArrayList<>(Arrays.asList(repositoryData));
+        List<RepositoryData> repositoryDataList = new ArrayList<>(Arrays.asList(repositoryDatum1s));
 
         // filtering out repositories from forks
 
         List<RepositoryData> noForksList = repositoryDataList
                 .stream()
-                .filter(repositoryFilter -> !repositoryFilter.isFork())
+                .filter(repositoryFilter -> !repositoryFilter.fork())
                 .toList();
 
         // for each repo get sha and name branch
 
         List<UserRepository> userRepositories = new ArrayList<>();
-        for(RepositoryData data : noForksList)
-        {
-            String brachesPath = "https://api.github.com/repos/" + userName + "/" + data.getName() + "/branches";
-            ResponseEntity<GitHubBranch[]> repoResponseData =
-                    restTemplate.exchange(
-                            brachesPath,
-                            HttpMethod.GET,
-                            entity,
-                            GitHubBranch[].class);
-            GitHubBranch[] gitHubBranch = repoResponseData.getBody();
 
-
-            List<GitHubBranch> gitHubBranchList = new ArrayList<>(Arrays.asList(gitHubBranch));
-
-            UserRepository tempUserRepository = new UserRepository();
-            tempUserRepository.setRepository_name(data.getName());
-            tempUserRepository.setOwner_login(userName);
-            tempUserRepository.setBranches(gitHubBranchList);
-            userRepositories.add(tempUserRepository);
-
-        }
-
+        noForksList.stream()
+                .forEach(data -> {
+                    var gitHubBranchList = (restTemplate.exchange(
+                                    "https://api.github.com/repos/" + userName + "/" + data.name() + "/branches",
+                                    HttpMethod.GET,
+                                    entity,
+                                    GitHubBranch[].class)
+                            .getBody());
+                    userRepositories.add(
+                            new UserRepository(
+                                    data.name(),
+                                    userName,
+                                    Arrays.asList(gitHubBranchList)
+                            )
+                    );
+                });
         return userRepositories;
+
     }
 
 }

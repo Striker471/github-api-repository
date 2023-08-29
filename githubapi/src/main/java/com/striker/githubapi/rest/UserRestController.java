@@ -18,8 +18,9 @@ public class UserRestController {
 
     @Value("${github.token}")
     private String githubToken;
+
     @Autowired
-    UserRestController(UserService theUserService){
+    UserRestController(UserService theUserService) {
         userService = theUserService;
 
     }
@@ -35,6 +36,5 @@ public class UserRestController {
         return userService.getUserRepositories(userName, githubToken);
 
     }
-
 
 }
